@@ -1,0 +1,19 @@
+{
+  "name": "certacrypt-graph",
+  "version": "0.0.1",
+  "description": "Access Control for Hyper-GraphDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fsteff/certacrypt-graph.git"
+  },
+  "author": "Stefan Fixl (Fsteff)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fsteff/certacrypt-graph/issues"
+  },
+  "homepage": "https://github.com/fsteff/certacrypt-graph#readme"
+}
