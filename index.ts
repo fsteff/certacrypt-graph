@@ -4,21 +4,11 @@ import { ICrypto } from 'certacrypt-crypto'
 import { CryptoCore, generateKeyId } from './lib/CryptoCore'
 import { Cipher } from 'certacrypt-crypto/lib/Key'
 
+
 export class CertaCryptGraph extends HyperGraphDB {
    
     constructor(corestore: Corestore, key?: string | Buffer, crypto?: ICrypto) {
         super(corestore, key, undefined, new CryptoCore(corestore, key, crypto))
-    }
-
-    async put(vertex: Vertex<GraphObject>, feed?: string | Buffer, key?: Buffer) {
-        if(key) {
-            if(!feed) feed = await this.core.getDefaultFeedId()
-                if(vertex.getId() >= 0) {
-                    const keyId = generateKeyId(feed, vertex.getId())
-                    this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
-                }
-        }
-        return super.put(vertex, feed)
     }
 
     async get(id: number, feed?: string | Buffer, key?: Buffer) : Promise<Vertex<GraphObject>>{
@@ -40,8 +30,13 @@ export class CertaCryptGraph extends HyperGraphDB {
         return vertex
     }
 
+    getKey(vertex: Vertex<GraphObject>) {
+        if(vertex.getId() < 0 || !vertex.getFeed()) throw new Error('vertex has to be persisted to get its key')
+        const keyId = generateKeyId(<string>vertex.getFeed(), vertex.getId())
+        return this.crypto.getKey(keyId)
+    }
+
     private get crypto() {
         return (<CryptoCore>this.core).crypto
     }
 }
-

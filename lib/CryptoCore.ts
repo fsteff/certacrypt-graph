@@ -22,7 +22,10 @@ export class CryptoCore extends Core {
 
         if(exec) {
             const retval = await exec(tr)
-            tr.commit()
+            await tr.commit()
+            for(const obj of tr.creates) {
+                this.crypto.registerKey(obj.key, {id: generateKeyId(feed, <number>obj.id), type: Cipher.ChaCha20_Stream})
+            }
             return retval
         }
 
@@ -39,6 +42,7 @@ export function generateKeyId(feed: string|Buffer, id: number) {
 class CryptoTransaction extends Transaction {
     private crypto: ICrypto
     private feed: string
+    readonly creates = new Array<CryptoObj>()
 
     constructor (crypto: ICrypto, store: BlockStorage, head?: number, opts?: ConstructorOpts) {
         super(store, head, opts)
@@ -58,6 +62,7 @@ class CryptoTransaction extends Transaction {
         const key = this.crypto.generateEncryptionKey(Cipher.ChaCha20_Stream)
         const obj = <CryptoObj>await super.create(data, true,  (index, data) => this.onWrite(undefined, index, data, key))
         obj.key = key
+        this.creates.push(obj)
         return obj
     }
 
