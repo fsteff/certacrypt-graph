@@ -1,14 +1,21 @@
-import { GraphObject, HyperGraphDB, Vertex } from 'hyper-graphdb'
-import { Corestore } from 'hyper-graphdb/lib/Core'
-import { ICrypto } from 'certacrypt-crypto'
+import { GraphObject, HyperGraphDB, Vertex, Corestore } from 'hyper-graphdb'
+import { ICrypto, Cipher } from 'certacrypt-crypto'
 import { CryptoCore, generateKeyId } from './lib/CryptoCore'
-import { Cipher } from 'certacrypt-crypto/lib/Key'
 
 
 export class CertaCryptGraph extends HyperGraphDB {
    
     constructor(corestore: Corestore, key?: string | Buffer, crypto?: ICrypto) {
         super(corestore, key, undefined, new CryptoCore(corestore, key, crypto))
+    }
+
+    async put(vertex: Vertex<GraphObject> | Array<Vertex<GraphObject>>, feed?: string | Buffer) {
+        const vertices = Array.isArray(vertex) ? vertex : [vertex]
+        
+        for(const elem of vertices) {
+            await (<CryptoCore>this.core).setEdgeKeys(elem)      
+        }
+        return super.put(vertex, feed)
     }
 
     async get(id: number, feed?: string | Buffer, key?: Buffer) : Promise<Vertex<GraphObject>>{
@@ -18,15 +25,8 @@ export class CertaCryptGraph extends HyperGraphDB {
             this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
         }
 
-        const vertex = await super.get(id, feed)
-        for(const edge of vertex.getEdges()) {
-            const id = edge.ref
-            const key = edge.metadata?.get('key')
-            if(key) {
-                const keyId = generateKeyId(<string>vertex.getFeed(), id)
-                this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
-            }
-        }
+        const vertex = await super.get(id, feed); // damn semicolon has cost me nerves XD (else it syntactically would be a method call)
+        (<CryptoCore>this.core).registerEdges(vertex)
         return vertex
     }
 

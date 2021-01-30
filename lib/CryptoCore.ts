@@ -1,9 +1,7 @@
-import { Core, Corestore } from 'hyper-graphdb/lib/Core'
-import { DefaultCrypto, ICrypto } from 'certacrypt-crypto'
-import { Cipher, KeyDef } from 'certacrypt-crypto/lib/Key'
-import Transaction from 'hyperobjects/lib/Transaction'
-import BlockStorage from 'hyperobjects/lib/BlockStorage'
-import { ConstructorOpts } from 'hyperobjects/lib/Transaction'
+import { Core, Corestore, Vertex } from 'hyper-graphdb'
+import { DefaultCrypto, ICrypto, Cipher, KeyDef } from 'certacrypt-crypto'
+import {Transaction, BlockStorage} from 'hyperobjects'
+import codecs from 'codecs'
 
 export class CryptoCore extends Core {
     readonly crypto: ICrypto
@@ -31,6 +29,36 @@ export class CryptoCore extends Core {
 
         return tr
     }
+
+    async getInTransaction<T>(id: number | string, contentEncoding : string | codecs.BaseCodec<T>, tr: Transaction, feed: string) : Promise<Vertex<T>> {
+        const vertex = await super.getInTransaction<T>(id, contentEncoding, tr, feed)
+        this.registerEdges(vertex)
+        return vertex
+    }
+
+    registerEdges(vertex: Vertex<any>) {
+        for(const edge of vertex.getEdges()) {
+            const id = edge.ref
+            const key = edge.metadata?.['key']
+            if(key) {
+                const keyId = generateKeyId(<string>vertex.getFeed(), id)
+                this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
+            }
+        }
+    }
+
+    async setEdgeKeys<T>(vertex: Vertex<any>) {
+        for(const edge of vertex.getEdges()) {
+            const id = edge.ref
+            const elemFeed = vertex.getFeed() ? Buffer.from(<string>vertex.getFeed(), 'hex') : undefined
+            const feed = edge.feed || elemFeed || await this.getDefaultFeedId()
+            const keyId = generateKeyId(feed, id)
+            const key = this.crypto.getKey(keyId)
+            if(key) {
+                edge.metadata = Object.assign(edge.metadata || {}, {key})
+            }
+        }
+    }
 }
 
 export type CryptoObj = {id?: number | undefined, key: Buffer}
@@ -44,8 +72,8 @@ class CryptoTransaction extends Transaction {
     private feed: string
     readonly creates = new Array<CryptoObj>()
 
-    constructor (crypto: ICrypto, store: BlockStorage, head?: number, opts?: ConstructorOpts) {
-        super(store, head, opts)
+    constructor (crypto: ICrypto, store: BlockStorage, head?: number) {
+        super(store, head)
         this.crypto = crypto
         this.feed = store.feed.feed.key.toString('hex')
     }
