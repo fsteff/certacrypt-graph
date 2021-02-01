@@ -5,6 +5,7 @@ import { CertaCryptGraph } from '..'
 import { SimpleGraphObject, Vertex } from 'hyper-graphdb'
 import { DefaultCrypto } from 'certacrypt-crypto'
 import { generateKeyId } from '../lib/CryptoCore'
+import { NoAccessError } from '../lib/Errors'
 
 tape('db', async t => {
     const store = new Corestore(RAM)
@@ -71,6 +72,6 @@ tape('no access', async t => {
         await db.get(v1.getId())
         t.fail('should throw')
     } catch(e) {
-        t.ok(e)
+        t.ok(e instanceof NoAccessError)
     }
 })

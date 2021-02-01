@@ -1,7 +1,8 @@
-import { Core, Corestore, Vertex } from 'hyper-graphdb'
+import { Core, Corestore, Vertex, Errors as HyperGraphErrors} from 'hyper-graphdb'
 import { DefaultCrypto, ICrypto, Cipher, KeyDef } from 'certacrypt-crypto'
-import {Transaction, BlockStorage} from 'hyperobjects'
+import {Transaction, BlockStorage, Errors as HyperObjectsErrors, Errors} from 'hyperobjects'
 import codecs from 'codecs'
+import { NoAccessError } from './Errors'
 
 export class CryptoCore extends Core {
     readonly crypto: ICrypto
@@ -31,7 +32,10 @@ export class CryptoCore extends Core {
     }
 
     async getInTransaction<T>(id: number | string, contentEncoding : string | codecs.BaseCodec<T>, tr: Transaction, feed: string) : Promise<Vertex<T>> {
-        const vertex = await super.getInTransaction<T>(id, contentEncoding, tr, feed)
+        const vertexId = typeof id === 'string' ? parseInt(id, 16) : <number> id
+        const vertex = <Vertex<T>> await super.getInTransaction<T>(vertexId, contentEncoding, tr, feed)
+            .catch(err => NoAccessError.detectAndThrow(vertexId, err))
+
         this.registerEdges(vertex)
         return vertex
     }
@@ -55,7 +59,8 @@ export class CryptoCore extends Core {
             const keyId = generateKeyId(feed, id)
             const key = this.crypto.getKey(keyId)
             if(key) {
-                edge.metadata = Object.assign(edge.metadata || {}, {key})
+                if(!edge.metadata) edge.metadata = {key}
+                else (<{key?: Buffer}>edge.metadata).key = key
             }
         }
     }
@@ -80,6 +85,7 @@ class CryptoTransaction extends Transaction {
 
     get (id: number) {
         return super.get(id, (index, data) => this.onRead(id, index, data))
+        .catch(err => NoAccessError.detectAndThrow(id, err))
     }
 
     set (id: number, data: Buffer) {

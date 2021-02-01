@@ -1,6 +1,8 @@
-import { GraphObject, HyperGraphDB, Vertex, Corestore } from 'hyper-graphdb'
+import { GraphObject, HyperGraphDB, Vertex, Corestore, Errors as HyperGraphErrors } from 'hyper-graphdb'
+import {Errors as HyperObjectsErrors } from 'hyperobjects'
 import { ICrypto, Cipher } from 'certacrypt-crypto'
 import { CryptoCore, generateKeyId } from './lib/CryptoCore'
+import { NoAccessError } from './lib/Errors'
 
 
 export class CertaCryptGraph extends HyperGraphDB {
@@ -25,8 +27,10 @@ export class CertaCryptGraph extends HyperGraphDB {
             this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
         }
 
-        const vertex = await super.get(id, feed); // damn semicolon has cost me nerves XD (else it syntactically would be a method call)
-        (<CryptoCore>this.core).registerEdges(vertex)
+        const vertex = <Vertex<GraphObject>> await super.get(id, feed)
+        .catch(err => NoAccessError.detectAndThrow(id, err))
+        // damn semicolon has cost me nerves XD (else it syntactically would be a method call)
+        ;(<CryptoCore>this.core).registerEdges(vertex)
         return vertex
     }
 
