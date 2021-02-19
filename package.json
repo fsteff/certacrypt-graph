@@ -1,6 +1,6 @@
 {
   "name": "certacrypt-graph",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Access Control for Hyper-GraphDB",
   "main": "index.js",
   "scripts": {

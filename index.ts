@@ -1,7 +1,7 @@
 import { GraphObject, HyperGraphDB, Vertex, Corestore, Errors as HyperGraphErrors } from 'hyper-graphdb'
 import {Errors as HyperObjectsErrors } from 'hyperobjects'
 import { ICrypto, Cipher } from 'certacrypt-crypto'
-import { CryptoCore, generateKeyId } from './lib/CryptoCore'
+import { CryptoCore } from './lib/CryptoCore'
 import { NoAccessError } from './lib/Errors'
 
 
@@ -23,8 +23,8 @@ export class CertaCryptGraph extends HyperGraphDB {
     async get(id: number, feed?: string | Buffer, key?: Buffer) : Promise<Vertex<GraphObject>>{
         if(key) {
             if(!feed) feed = await this.core.getDefaultFeedId()
-            const keyId = generateKeyId(feed, id)
-            this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
+            feed = Buffer.isBuffer(feed) ? feed.toString('hex') : feed
+            this.crypto.registerKey(key, {feed, index: id, type: Cipher.ChaCha20_Stream})
         }
 
         const vertex = <Vertex<GraphObject>> await super.get(id, feed)
@@ -36,8 +36,7 @@ export class CertaCryptGraph extends HyperGraphDB {
 
     getKey(vertex: Vertex<GraphObject>) {
         if(vertex.getId() < 0 || !vertex.getFeed()) throw new Error('vertex has to be persisted to get its key')
-        const keyId = generateKeyId(<string>vertex.getFeed(), vertex.getId())
-        return this.crypto.getKey(keyId)
+        return this.crypto.getKey(<string>vertex.getFeed(), vertex.getId())
     }
 
     private get crypto() {

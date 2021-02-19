@@ -12,10 +12,10 @@ export class CryptoCore extends Core {
         this.crypto = crypto || new DefaultCrypto()
     }
 
-    async transaction(feed: string|Buffer, exec: (tr: Transaction) => any) {
+    async transaction(feed: string|Buffer, exec: (tr: Transaction) => any, version?: number) {
         const store = await this.getStore(feed)
         await store.storage.ready()
-        const head = await store.feed.length()
+        const head = version || await store.feed.length()
         const tr = new CryptoTransaction(this.crypto, store.storage, head)
         await tr.ready()
 
@@ -23,7 +23,7 @@ export class CryptoCore extends Core {
             const retval = await exec(tr)
             await tr.commit()
             for(const obj of tr.creates) {
-                this.crypto.registerKey(obj.key, {id: generateKeyId(feed, <number>obj.id), type: Cipher.ChaCha20_Stream})
+                this.crypto.registerKey(obj.key, {feed: hex(feed), index: <number>obj.id, type: Cipher.ChaCha20_Stream})
             }
             return retval
         }
@@ -45,8 +45,7 @@ export class CryptoCore extends Core {
             const id = edge.ref
             const key = edge.metadata?.['key']
             if(key) {
-                const keyId = generateKeyId(<string>vertex.getFeed(), id)
-                this.crypto.registerKey(key, {id: keyId, type: Cipher.ChaCha20_Stream})
+                this.crypto.registerKey(key, {feed: <string>vertex.getFeed(), index: id, type: Cipher.ChaCha20_Stream})
             }
         }
     }
@@ -56,8 +55,7 @@ export class CryptoCore extends Core {
             const id = edge.ref
             const elemFeed = vertex.getFeed() ? Buffer.from(<string>vertex.getFeed(), 'hex') : undefined
             const feed = edge.feed || elemFeed || await this.getDefaultFeedId()
-            const keyId = generateKeyId(feed, id)
-            const key = this.crypto.getKey(keyId)
+            const key = this.crypto.getKey(hex(feed), id)
             if(key) {
                 if(!edge.metadata) edge.metadata = {key}
                 else (<{key?: Buffer}>edge.metadata).key = key
@@ -67,10 +65,6 @@ export class CryptoCore extends Core {
 }
 
 export type CryptoObj = {id?: number | undefined, key: Buffer}
-
-export function generateKeyId(feed: string|Buffer, id: number) {
-    return (Buffer.isBuffer(feed) ? feed.toString('hex') : feed) + '@' + id
-}
 
 class CryptoTransaction extends Transaction {
     private crypto: ICrypto
@@ -103,9 +97,9 @@ class CryptoTransaction extends Transaction {
     
 
     private onRead(id: number, index: number, data: Buffer) : Buffer {
-        const feedId = generateKeyId(this.feed, id)
-        if(this.crypto.hasKey(feedId)) {
-            const keydef: KeyDef = {id: feedId, type: Cipher.ChaCha20_Stream, nonce: index}
+        const feed = hex(this.feed)
+        if(this.crypto.hasKey(feed, id)) {
+            const keydef: KeyDef = {feed, index: id, type: Cipher.ChaCha20_Stream, nonce: index}
             return this.crypto.decrypt(data, keydef)
         } else {
             return data
@@ -113,15 +107,19 @@ class CryptoTransaction extends Transaction {
     }
 
     private onWrite(id: number|undefined, index: number, data: Buffer, key?: Buffer) : Buffer {
-        const feedId = generateKeyId(this.feed, id || 0)
         if(key) {
-            const keydef: KeyDef = {id: feedId, type: Cipher.ChaCha20_Stream, nonce: index}
+            const keydef = <KeyDef>{type: Cipher.ChaCha20_Stream, nonce: index}
             return this.crypto.encrypt(data, keydef, key)
-        } else if(id !== undefined && this.crypto.hasKey(feedId)) {
-            const keydef: KeyDef = {id: feedId, type: Cipher.ChaCha20_Stream, nonce: index}
+        } else if(id !== undefined && this.crypto.hasKey(hex(this.feed), id)) {
+            const keydef: KeyDef = {feed: hex(this.feed), index: id, type: Cipher.ChaCha20_Stream, nonce: index}
             return this.crypto.encrypt(data, keydef)
         } else {
             return data
         } 
     }
+}
+
+function hex(feed: string|Buffer) {
+    if(typeof feed === 'string') return feed
+    else return feed.toString('hex')
 }

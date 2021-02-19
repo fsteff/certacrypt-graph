@@ -4,7 +4,6 @@ import tape from 'tape'
 import { CertaCryptGraph } from '..'
 import { SimpleGraphObject, Vertex } from 'hyper-graphdb'
 import { DefaultCrypto } from 'certacrypt-crypto'
-import { generateKeyId } from '../lib/CryptoCore'
 import { NoAccessError } from '../lib/Errors'
 
 tape('db', async t => {
@@ -28,7 +27,7 @@ tape('manual access', async t => {
     await store.ready()
     const crypto = new DefaultCrypto()
     const db = new CertaCryptGraph(store, undefined, crypto)
-    const feed = await db.core.getDefaultFeedId()
+    const feed = (await db.core.getDefaultFeedId()).toString('hex')
 
     const v1 = db.create<SimpleGraphObject>(), v2 = db.create<SimpleGraphObject>()
     v1.setContent(new SimpleGraphObject().set('greeting', 'hello'))
@@ -40,8 +39,8 @@ tape('manual access', async t => {
 
     const v1Key = db.getKey(v1)
     t.ok(Buffer.isBuffer(v1Key))
-    crypto.unregisterKey(generateKeyId(feed, v1.getId()))
-    crypto.unregisterKey(generateKeyId(feed, v2.getId()))
+    crypto.unregisterKey(feed, v1.getId())
+    crypto.unregisterKey(feed, v2.getId())
 
     // by calling get() with a key that is the entry point to the graph, all furher keys are stored in the edges
     let c1 = <Vertex<SimpleGraphObject>> await db.get(v1.getId(), feed, v1Key)
@@ -50,7 +49,7 @@ tape('manual access', async t => {
     t.same('hola', c2.getContent()?.get('greeting'))
 
     // same has to work with a query
-    crypto.unregisterKey(generateKeyId(feed, v2.getId()))
+    crypto.unregisterKey(feed, v2.getId())
     for await (const v of db.queryAtVertex(v1).out('next').vertices()) {
         t.same('hola', (<Vertex<SimpleGraphObject>>v).getContent()?.get('greeting'))
     }
@@ -61,13 +60,13 @@ tape('no access', async t => {
     await store.ready()
     const crypto = new DefaultCrypto()
     const db = new CertaCryptGraph(store, undefined, crypto)
-    const feed = await db.core.getDefaultFeedId()
+    const feed = (await db.core.getDefaultFeedId()).toString('hex')
 
     const v1 = db.create<SimpleGraphObject>(), v2 = db.create<SimpleGraphObject>()
     v1.setContent(new SimpleGraphObject().set('greeting', 'hello'))
     await db.put(v1)
 
-    crypto.unregisterKey(generateKeyId(feed, v1.getId()))
+    crypto.unregisterKey(feed, v1.getId())
     try {
         await db.get(v1.getId())
         t.fail('should throw')
