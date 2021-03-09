@@ -37,7 +37,7 @@ tape('manual access', async t => {
     v1.addEdgeTo(v2, 'next')
     await db.put(v1)
 
-    const v1Key = db.getKey(v1)
+    const v1Key = <Buffer> db.getKey(v1)
     t.ok(Buffer.isBuffer(v1Key))
     crypto.unregisterKey(feed, v1.getId())
     crypto.unregisterKey(feed, v2.getId())
@@ -68,8 +68,8 @@ tape('no access', async t => {
 
     crypto.unregisterKey(feed, v1.getId())
     try {
-        await db.get(v1.getId())
-        t.fail('should throw')
+        const res = await db.get(v1.getId())
+        t.fail('should throw, but got res: ' + res.getId())
     } catch(e) {
         t.ok(e instanceof NoAccessError)
     }

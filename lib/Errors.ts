@@ -5,7 +5,7 @@ export class NoAccessError extends Error {
     readonly cause: HyperObjectsErrors.DecodingError | HyperGraphErrors.VertexDecodingError
 
     constructor(objectId: number, err: HyperObjectsErrors.DecodingError | HyperGraphErrors.VertexDecodingError) {
-        super(`Cannot access node ${objectId}`)
+        super(`Cannot access object ${objectId}`)
         this.cause = err
     }
 
