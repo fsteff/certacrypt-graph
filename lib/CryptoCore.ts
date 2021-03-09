@@ -136,6 +136,9 @@ function appendChecksum(data: Buffer) {
 }
 
 function validateChecksum(buf: Buffer) {
+    if(buf.length < 4) {
+        return false
+    }
     const data = buf.slice(0, buf.length - 4)
     const rest = buf.slice(buf.length - 4)
     const crc = crc32.unsigned(data)
