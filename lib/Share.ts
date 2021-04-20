@@ -1,11 +1,10 @@
-import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGraphObject  } from 'hyper-graphdb'
-
+import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGraphObject, GRAPH_VIEW  } from 'hyper-graphdb'
 
 export class ShareGraphObject extends GraphObject {
     readonly typeName = 'Share'
     public version?: number
 
-    constructor(serialized: Uint8Array) {
+    constructor(serialized?: Uint8Array) {
         super()
         if(serialized) {
             const json: {version?: number} = JSON.parse(serialized.toString())
@@ -31,7 +30,7 @@ export class ShareView extends View<GraphObject> {
         const edges = vertex.getEdges(label)
         const vertices = new Array<Promise<IVertex<GraphObject>>>()
         for(const edge of edges) {
-            const version = vertex.getContent().version // optional, might be undefined - TODO: test pinning
+            const version = vertex.getContent()?.version // optional, might be undefined - TODO: test pinning
             const feed =  edge.feed?.toString('hex') || <string>vertex.getFeed()
             vertices.push(this.get(feed, edge.ref, version, edge.view))
         }
@@ -42,12 +41,12 @@ export class ShareView extends View<GraphObject> {
     // within a query getting the share vertex actually returns the one on the 'share' edge
     public async get(feed: string|Buffer, id: number, version?: number, viewDesc?: string) : Promise<IVertex<GraphObject>>{
         feed = Buffer.isBuffer(feed) ? feed.toString('hex') : feed
-        viewDesc = viewDesc || SHARE_VIEW
+        viewDesc = viewDesc || GRAPH_VIEW
 
         const tr = await this.getTransaction(feed, version)
         const vertex = await this.db.getInTransaction<GraphObject>(id, this.codec, tr, feed)
 
-        const view = this.getView(viewDesc)
+        const view = this.getView(viewDesc) 
         const next = await (await view.out(vertex, 'share')).destruct()
         if(next.length === 0) throw new Error('vertex has no share edge, cannot use ShareView')
         return next[0]

@@ -5,6 +5,7 @@ import { CertaCryptGraph } from '..'
 import { SimpleGraphObject, Vertex } from 'hyper-graphdb'
 import { DefaultCrypto } from 'certacrypt-crypto'
 import { NoAccessError } from '../lib/Errors'
+import { ShareGraphObject, SHARE_VIEW } from '../lib/Share'
 
 tape('db', async t => {
     const store = new Corestore(RAM)
@@ -50,7 +51,7 @@ tape('manual access', async t => {
 
     // same has to work with a query
     crypto.unregisterKey(feed, v2.getId())
-    for await (const v of db.queryAtVertex(v1).out('next').vertices()) {
+    for (const v of await db.queryAtVertex(v1).out('next').vertices()) {
         t.same('hola', (<Vertex<SimpleGraphObject>>v).getContent()?.get('greeting'))
     }
 })
@@ -73,4 +74,28 @@ tape('no access', async t => {
     } catch(e) {
         t.ok(e instanceof NoAccessError)
     }
+})
+
+tape('share', async t => {
+    const store = new Corestore(RAM)
+    await store.ready()
+    const db = new CertaCryptGraph(store)
+
+    const v1 = db.create<SimpleGraphObject>(), v2 = db.create<SimpleGraphObject>()
+    v1.setContent(new SimpleGraphObject().set('greeting', 'hello'))
+    v2.setContent(new SimpleGraphObject().set('greeting', 'hola'))
+    await db.put([v1, v2])
+
+    const v3 = db.create<ShareGraphObject>()
+    const share = new ShareGraphObject()
+    share.version = v2.getVersion()
+    v3.setContent(share)
+    v3.addEdgeTo(v2, 'share')
+    await db.put(v3)
+
+    v1.addEdgeTo(v3, 'link', undefined, undefined, SHARE_VIEW)
+    await db.put(v1)
+
+    const shared = await db.queryAtVertex(v1).out('link').vertices()
+    t.ok(shared[0].equals(v2))
 })

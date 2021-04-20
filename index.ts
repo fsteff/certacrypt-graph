@@ -3,12 +3,15 @@ import {Errors as HyperObjectsErrors } from 'hyperobjects'
 import { ICrypto, Cipher } from 'certacrypt-crypto'
 import { CryptoCore } from './lib/CryptoCore'
 import { NoAccessError } from './lib/Errors'
+import { ShareGraphObject, ShareView, SHARE_VIEW } from './lib/Share'
 
 
 export class CertaCryptGraph extends HyperGraphDB {
    
     constructor(corestore: Corestore, key?: string | Buffer, crypto?: ICrypto) {
         super(corestore, key, undefined, new CryptoCore(corestore, key, crypto))
+        this.codec.registerImpl(serialized => new ShareGraphObject(serialized))
+        this.factory.register(SHARE_VIEW, (db, codec, tr) => new ShareView(db, codec, this.factory, tr))
     }
 
     async put(vertex: Vertex<GraphObject> | Array<Vertex<GraphObject>>, feed?: string | Buffer) {

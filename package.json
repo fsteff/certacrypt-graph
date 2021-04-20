@@ -4,7 +4,7 @@
   "description": "Access Control for Hyper-GraphDB",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape ./dist/tests/*.js"
   },
   "repository": {
     "type": "git",
