@@ -5,6 +5,7 @@ import { CryptoCore } from './lib/CryptoCore'
 import { NoAccessError } from './lib/Errors'
 import { ShareGraphObject, ShareView, SHARE_VIEW } from './lib/Share'
 
+export { ShareGraphObject, ShareView, SHARE_VIEW, NoAccessError }
 
 export class CertaCryptGraph extends HyperGraphDB {
    
