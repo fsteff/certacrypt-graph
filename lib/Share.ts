@@ -3,18 +3,20 @@ import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGra
 export class ShareGraphObject extends GraphObject {
     readonly typeName = 'Share'
     public version?: number
+    public info?: string
 
     constructor(serialized?: Uint8Array) {
         super()
         if(serialized) {
-            const json: {version?: number} = JSON.parse(serialized.toString())
+            const json: {version?: number, info?: string} = JSON.parse(serialized.toString())
             if(json.version) this.version = json.version
         }
     }
 
     public serialize() {
-        let json: {version?: number} = {}
+        let json: {version?: number, info?: string} = {}
         if(this.version) json.version = this.version
+        if(this.info) json.info = this.info
         return Buffer.from(JSON.stringify(json))
     }
 }
