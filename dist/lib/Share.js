@@ -16,6 +16,8 @@ class ShareGraphObject extends hyper_graphdb_1.GraphObject {
         let json = {};
         if (this.version)
             json.version = this.version;
+        if (this.info)
+            json.info = this.info;
         return Buffer.from(JSON.stringify(json));
     }
 }

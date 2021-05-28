@@ -17,9 +17,9 @@
   },
   "homepage": "https://github.com/fsteff/certacrypt-graph#readme",
   "dependencies": {
-    "hyperobjects": "git+https://github.com/fsteff/hyperobjects.git",
-    "hyper-graphdb": "git+https://github.com/fsteff/hyper-graphdb.git",
     "@types/buffer-crc32": "^0.2.0",
-    "buffer-crc32": "^0.2.13"
+    "buffer-crc32": "^0.2.13",
+    "hyper-graphdb": "git+https://github.com/fsteff/hyper-graphdb.git",
+    "hyperobjects": "git+https://github.com/fsteff/hyperobjects.git"
   }
 }
