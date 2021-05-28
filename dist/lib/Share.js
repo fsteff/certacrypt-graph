@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShareView = exports.SHARE_VIEW = exports.ShareGraphObject = void 0;
+exports.ShareView = exports.SHARE_VIEW = exports.ShareGraphObject = exports.SHARE_GRAPHOBJECT = void 0;
 const hyper_graphdb_1 = require("hyper-graphdb");
+exports.SHARE_GRAPHOBJECT = 'Share';
 class ShareGraphObject extends hyper_graphdb_1.GraphObject {
     constructor(serialized) {
         super();
-        this.typeName = 'Share';
+        this.typeName = exports.SHARE_GRAPHOBJECT;
         if (serialized) {
             const json = JSON.parse(serialized.toString());
             if (json.version)

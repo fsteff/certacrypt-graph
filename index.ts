@@ -3,9 +3,9 @@ import {Errors as HyperObjectsErrors } from 'hyperobjects'
 import { ICrypto, Cipher } from 'certacrypt-crypto'
 import { CryptoCore } from './lib/CryptoCore'
 import { NoAccessError } from './lib/Errors'
-import { ShareGraphObject, ShareView, SHARE_VIEW } from './lib/Share'
+import { ShareGraphObject, ShareView, SHARE_VIEW, SHARE_GRAPHOBJECT } from './lib/Share'
 
-export { ShareGraphObject, ShareView, SHARE_VIEW, NoAccessError }
+export { ShareGraphObject, ShareView, SHARE_VIEW, SHARE_GRAPHOBJECT,NoAccessError }
 
 export class CertaCryptGraph extends HyperGraphDB {
    

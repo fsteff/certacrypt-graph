@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CertaCryptGraph = exports.NoAccessError = exports.SHARE_VIEW = exports.ShareView = exports.ShareGraphObject = void 0;
+exports.CertaCryptGraph = exports.NoAccessError = exports.SHARE_GRAPHOBJECT = exports.SHARE_VIEW = exports.ShareView = exports.ShareGraphObject = void 0;
 const hyper_graphdb_1 = require("hyper-graphdb");
 const certacrypt_crypto_1 = require("certacrypt-crypto");
 const CryptoCore_1 = require("./lib/CryptoCore");
@@ -10,6 +10,7 @@ const Share_1 = require("./lib/Share");
 Object.defineProperty(exports, "ShareGraphObject", { enumerable: true, get: function () { return Share_1.ShareGraphObject; } });
 Object.defineProperty(exports, "ShareView", { enumerable: true, get: function () { return Share_1.ShareView; } });
 Object.defineProperty(exports, "SHARE_VIEW", { enumerable: true, get: function () { return Share_1.SHARE_VIEW; } });
+Object.defineProperty(exports, "SHARE_GRAPHOBJECT", { enumerable: true, get: function () { return Share_1.SHARE_GRAPHOBJECT; } });
 class CertaCryptGraph extends hyper_graphdb_1.HyperGraphDB {
     constructor(corestore, key, crypto) {
         super(corestore, key, undefined, new CryptoCore_1.CryptoCore(corestore, key, crypto));

@@ -1,7 +1,9 @@
 import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGraphObject, GRAPH_VIEW  } from 'hyper-graphdb'
 
+export const SHARE_GRAPHOBJECT = 'Share'
+
 export class ShareGraphObject extends GraphObject {
-    readonly typeName = 'Share'
+    readonly typeName = SHARE_GRAPHOBJECT
     public version?: number
     public info?: string
 
