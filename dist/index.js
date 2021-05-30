@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CertaCryptGraph = exports.NoAccessError = exports.SHARE_GRAPHOBJECT = exports.SHARE_VIEW = exports.ShareView = exports.ShareGraphObject = void 0;
+exports.CertaCryptGraph = exports.NoAccessError = exports.SHARE_GRAPHOBJECT = exports.SHARE_VIEW = exports.ShareView = exports.CryptoCore = exports.ShareGraphObject = void 0;
 const hyper_graphdb_1 = require("hyper-graphdb");
 const certacrypt_crypto_1 = require("certacrypt-crypto");
 const CryptoCore_1 = require("./lib/CryptoCore");
+Object.defineProperty(exports, "CryptoCore", { enumerable: true, get: function () { return CryptoCore_1.CryptoCore; } });
 const Errors_1 = require("./lib/Errors");
 Object.defineProperty(exports, "NoAccessError", { enumerable: true, get: function () { return Errors_1.NoAccessError; } });
 const Share_1 = require("./lib/Share");
