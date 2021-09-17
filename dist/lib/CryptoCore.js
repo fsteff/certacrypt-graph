@@ -38,22 +38,24 @@ class CryptoCore extends hyper_graphdb_1.Core {
         return vertex;
     }
     registerEdges(vertex) {
-        var _a;
+        var _a, _b;
         for (const edge of vertex.getEdges()) {
             const id = edge.ref;
             const key = (_a = edge.metadata) === null || _a === void 0 ? void 0 : _a['key'];
+            const feed = ((_b = edge.feed) === null || _b === void 0 ? void 0 : _b.toString('hex')) || vertex.getFeed();
             if (key) {
-                this.crypto.registerKey(key, { feed: vertex.getFeed(), index: id, type: certacrypt_crypto_1.Cipher.ChaCha20_Stream });
+                this.crypto.registerKey(key, { feed, index: id, type: certacrypt_crypto_1.Cipher.ChaCha20_Stream });
             }
         }
     }
     async setEdgeKeys(vertex) {
+        var _a;
         for (const edge of vertex.getEdges()) {
             const id = edge.ref;
             const elemFeed = vertex.getFeed() ? Buffer.from(vertex.getFeed(), 'hex') : undefined;
             const feed = edge.feed || elemFeed || await this.getDefaultFeedId();
             const key = this.crypto.getKey(hex(feed), id);
-            if (key) {
+            if (key && !((_a = edge.metadata) === null || _a === void 0 ? void 0 : _a['envelope'])) {
                 if (!edge.metadata)
                     edge.metadata = { key };
                 else

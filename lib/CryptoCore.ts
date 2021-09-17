@@ -45,8 +45,9 @@ export class CryptoCore extends Core {
         for (const edge of vertex.getEdges()) {
             const id = edge.ref
             const key = edge.metadata?.['key']
+            const feed = edge.feed?.toString('hex') || <string>vertex.getFeed()
             if (key) {
-                this.crypto.registerKey(key, { feed: <string>vertex.getFeed(), index: id, type: Cipher.ChaCha20_Stream })
+                this.crypto.registerKey(key, { feed, index: id, type: Cipher.ChaCha20_Stream })
             }
         }
     }
@@ -57,7 +58,7 @@ export class CryptoCore extends Core {
             const elemFeed = vertex.getFeed() ? Buffer.from(<string>vertex.getFeed(), 'hex') : undefined
             const feed = edge.feed || elemFeed || await this.getDefaultFeedId()
             const key = this.crypto.getKey(hex(feed), id)
-            if (key) {
+            if (key && !edge.metadata?.['envelope']) {
                 if (!edge.metadata) edge.metadata = { key }
                 else (<{ key?: Buffer }>edge.metadata).key = key
             }
