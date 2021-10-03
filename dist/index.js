@@ -45,6 +45,27 @@ class CertaCryptGraph extends hyper_graphdb_1.HyperGraphDB {
     get crypto() {
         return this.core.crypto;
     }
+    async createShare(vertex, label, opts = {}) {
+        const share = new Share_1.ShareGraphObject();
+        share.info = opts === null || opts === void 0 ? void 0 : opts.info;
+        share.owner = opts === null || opts === void 0 ? void 0 : opts.owner;
+        share.version = opts === null || opts === void 0 ? void 0 : opts.version;
+        const edge = {
+            label: 'share',
+            version: vertex.getVersion(),
+            ref: vertex.getId(),
+            feed: Buffer.from(vertex.getFeed(), 'hex'),
+            metadata: {
+                key: this.getKey(vertex),
+                name: Buffer.from(label, 'utf-8')
+            }
+        };
+        const shareVertex = this.create();
+        shareVertex.setContent(share);
+        shareVertex.addEdge(edge);
+        await this.put(shareVertex);
+        return shareVertex;
+    }
 }
 exports.CertaCryptGraph = CertaCryptGraph;
 //# sourceMappingURL=index.js.map

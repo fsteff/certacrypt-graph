@@ -11,6 +11,10 @@ class ShareGraphObject extends hyper_graphdb_1.GraphObject {
             const json = JSON.parse(serialized.toString());
             if (json.version)
                 this.version = json.version;
+            if (json.info)
+                this.info = json.info;
+            if (json.owner)
+                this.owner = json.owner;
         }
     }
     serialize() {
@@ -19,6 +23,8 @@ class ShareGraphObject extends hyper_graphdb_1.GraphObject {
             json.version = this.version;
         if (this.info)
             json.info = this.info;
+        if (this.owner)
+            json.owner = this.owner;
         return Buffer.from(JSON.stringify(json));
     }
 }

@@ -1,4 +1,4 @@
-import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGraphObject, GRAPH_VIEW  } from 'hyper-graphdb'
+import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGraphObject, GRAPH_VIEW, Edge  } from 'hyper-graphdb'
 
 export const SHARE_GRAPHOBJECT = 'Share'
 
@@ -6,19 +6,23 @@ export class ShareGraphObject extends GraphObject {
     readonly typeName = SHARE_GRAPHOBJECT
     public version?: number
     public info?: string
+    public owner?: string
 
     constructor(serialized?: Uint8Array) {
         super()
         if(serialized) {
-            const json: {version?: number, info?: string} = JSON.parse(serialized.toString())
+            const json: {version?: number, info?: string, owner?: string} = JSON.parse(serialized.toString())
             if(json.version) this.version = json.version
+            if(json.info) this.info = json.info
+            if(json.owner) this.owner = json.owner
         }
     }
 
     public serialize() {
-        let json: {version?: number, info?: string} = {}
+        let json: {version?: number, info?: string, owner?: string} = {}
         if(this.version) json.version = this.version
         if(this.info) json.info = this.info
+        if(this.owner) json.owner = this.owner
         return Buffer.from(JSON.stringify(json))
     }
 }

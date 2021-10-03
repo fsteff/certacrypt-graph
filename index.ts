@@ -46,4 +46,27 @@ export class CertaCryptGraph extends HyperGraphDB {
     private get crypto() {
         return (<CryptoCore>this.core).crypto
     }
+
+    async createShare(vertex: Vertex<GraphObject>, opts: {version?: number, info?: string, owner?: string} = {}): Promise<Vertex<ShareGraphObject>> {
+        const share = new ShareGraphObject()
+        share.info = opts?.info
+        share.owner = opts?.owner
+        share.version = opts?.version
+
+        const edge = {
+            label: 'share',
+            ref: vertex.getId(),
+            version: vertex.getVersion(),
+            feed: Buffer.from(<string> vertex.getFeed(), 'hex'),
+            metadata: {
+                key: <Buffer> this.getKey(vertex)
+            }
+        }
+
+        const shareVertex = this.create<ShareGraphObject>()
+        shareVertex.setContent(share)
+        shareVertex.addEdge(edge)
+        await this.put(shareVertex)
+        return shareVertex
+    }
 }
