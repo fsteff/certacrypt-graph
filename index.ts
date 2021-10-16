@@ -43,6 +43,11 @@ export class CertaCryptGraph extends HyperGraphDB {
         return this.crypto.getKey(<string>vertex.getFeed(), vertex.getId())
     }
 
+    registerVertexKey(id: number, feed: string|Buffer, key: Buffer) {
+        feed = Buffer.isBuffer(feed) ? feed.toString('hex') : feed
+        this.crypto.registerKey(key, {index: id, feed, type: Cipher.ChaCha20_Stream})
+    }
+
     private get crypto() {
         return (<CryptoCore>this.core).crypto
     }

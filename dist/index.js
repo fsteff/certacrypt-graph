@@ -42,22 +42,25 @@ class CertaCryptGraph extends hyper_graphdb_1.HyperGraphDB {
             throw new Error('vertex has to be persisted to get its key');
         return this.crypto.getKey(vertex.getFeed(), vertex.getId());
     }
+    registerVertexKey(id, feed, key) {
+        feed = Buffer.isBuffer(feed) ? feed.toString('hex') : feed;
+        this.crypto.registerKey(key, { index: id, feed, type: certacrypt_crypto_1.Cipher.ChaCha20_Stream });
+    }
     get crypto() {
         return this.core.crypto;
     }
-    async createShare(vertex, label, opts = {}) {
+    async createShare(vertex, opts = {}) {
         const share = new Share_1.ShareGraphObject();
         share.info = opts === null || opts === void 0 ? void 0 : opts.info;
         share.owner = opts === null || opts === void 0 ? void 0 : opts.owner;
         share.version = opts === null || opts === void 0 ? void 0 : opts.version;
         const edge = {
             label: 'share',
-            version: vertex.getVersion(),
             ref: vertex.getId(),
+            version: vertex.getVersion(),
             feed: Buffer.from(vertex.getFeed(), 'hex'),
             metadata: {
-                key: this.getKey(vertex),
-                name: Buffer.from(label, 'utf-8')
+                key: this.getKey(vertex)
             }
         };
         const shareVertex = this.create();
