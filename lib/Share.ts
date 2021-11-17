@@ -1,4 +1,6 @@
 import { Generator, GraphObject, View, IVertex, Vertex, VertexQueries, SimpleGraphObject, GRAPH_VIEW, Edge  } from 'hyper-graphdb'
+import { QueryState } from 'hyper-graphdb'
+import { QueryResult } from 'hyper-graphdb'
 
 export const SHARE_GRAPHOBJECT = 'Share'
 
@@ -31,19 +33,20 @@ export const SHARE_VIEW = 'ShareView'
 export class ShareView extends View<GraphObject> {
     public viewName = SHARE_VIEW;
 
-    public async out(vertex: Vertex<ShareGraphObject>, label?: string):  Promise<VertexQueries<GraphObject>> {
+    public async out(state: QueryState<GraphObject>, label?: string):  Promise<QueryResult<GraphObject>> {
+        const vertex = <Vertex<ShareGraphObject>> state.value
         if(!(vertex.getContent() instanceof ShareGraphObject)) {
             throw new Error('Vertex is not a a physical one, cannot use it for a ShareView')
         }
         const edges = vertex.getEdges(label)
-        const vertices = new Array<Promise<IVertex<GraphObject>>>()
+        const vertices: QueryResult<GraphObject> = []
         for(const edge of edges) {
             const version = vertex.getContent()?.version // optional, might be undefined - TODO: test pinning
             const feed =  edge.feed?.toString('hex') || <string>vertex.getFeed()
-            vertices.push(this.get(feed, edge.ref, version, edge.view))
+            vertices.push(this.get(feed, edge.ref, version, edge.view).then(v => this.toResult(v, edge, state)))
         }
         
-        return Generator.from(vertices)
+        return vertices
     }
 
     // within a query getting the share vertex actually returns the one on the 'share' edge
@@ -55,7 +58,7 @@ export class ShareView extends View<GraphObject> {
         const vertex = await this.db.getInTransaction<GraphObject>(id, this.codec, tr, feed)
 
         const view = this.getView(viewDesc) 
-        const next = await (await view.out(vertex, 'share')).destruct()
+        const next = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [])])).out('share').vertices()//await (await view.out(vertex, 'share')).destruct()
         if(next.length === 0) throw new Error('vertex has no share edge, cannot use ShareView')
         return next[0]
     }

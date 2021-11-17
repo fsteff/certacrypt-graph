@@ -13,7 +13,7 @@ export class CryptoCore extends Core {
         this.crypto = crypto || new DefaultCrypto()
     }
 
-    async transaction(feed: string | Buffer, exec: (tr: Transaction) => any, version?: number) {
+    async transaction(feed: string | Buffer, exec?: (tr: Transaction) => any, version?: number) {
         const store = await this.getStore(feed)
         await store.storage.ready()
         const head = version || await store.feed.length()

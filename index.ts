@@ -1,5 +1,4 @@
 import { GraphObject, HyperGraphDB, Vertex, Corestore, Errors as HyperGraphErrors } from 'hyper-graphdb'
-import {Errors as HyperObjectsErrors } from 'hyperobjects'
 import { ICrypto, Cipher } from 'certacrypt-crypto'
 import { CryptoCore } from './lib/CryptoCore'
 import { NoAccessError } from './lib/Errors'

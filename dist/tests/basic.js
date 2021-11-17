@@ -85,7 +85,7 @@ tape_1.default('share', async (t) => {
     v3.setContent(share);
     v3.addEdgeTo(v2, 'share');
     await db.put(v3);
-    v1.addEdgeTo(v3, 'link', undefined, undefined, Share_1.SHARE_VIEW);
+    v1.addEdgeTo(v3, 'link', { view: Share_1.SHARE_VIEW });
     await db.put(v1);
     const shared = await db.queryAtVertex(v1).out('link').vertices();
     t.ok(shared[0].equals(v2));

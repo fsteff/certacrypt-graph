@@ -93,7 +93,7 @@ tape('share', async t => {
     v3.addEdgeTo(v2, 'share')
     await db.put(v3)
 
-    v1.addEdgeTo(v3, 'link', undefined, undefined, SHARE_VIEW)
+    v1.addEdgeTo(v3, 'link', {view: SHARE_VIEW})
     await db.put(v1)
 
     const shared = await db.queryAtVertex(v1).out('link').vertices()
