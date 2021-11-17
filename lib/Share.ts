@@ -58,7 +58,7 @@ export class ShareView extends View<GraphObject> {
         const vertex = await this.db.getInTransaction<GraphObject>(id, this.codec, tr, feed)
 
         const view = this.getView(viewDesc) 
-        const next = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [])])).out('share').vertices()//await (await view.out(vertex, 'share')).destruct()
+        const next = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [])])).out('share').vertices()
         if(next.length === 0) throw new Error('vertex has no share edge, cannot use ShareView')
         return next[0]
     }
