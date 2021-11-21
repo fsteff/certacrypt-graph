@@ -37,7 +37,7 @@ class ShareView extends hyper_graphdb_1.View {
         this.viewName = exports.SHARE_VIEW;
     }
     async out(state, label) {
-        var _a, _b;
+        var _a;
         const vertex = state.value;
         if (!(vertex.getContent() instanceof ShareGraphObject)) {
             throw new Error('Vertex is not a a physical one, cannot use it for a ShareView');
@@ -46,22 +46,21 @@ class ShareView extends hyper_graphdb_1.View {
         const vertices = [];
         for (const edge of edges) {
             const version = (_a = vertex.getContent()) === null || _a === void 0 ? void 0 : _a.version; // optional, might be undefined - TODO: test pinning
-            const feed = ((_b = edge.feed) === null || _b === void 0 ? void 0 : _b.toString('hex')) || vertex.getFeed();
-            vertices.push(this.get(feed, edge.ref, version, edge.view).then(v => this.toResult(v, edge, state)));
+            const feed = edge.feed || Buffer.from(vertex.getFeed());
+            vertices.push(this.get(Object.assign(Object.assign({}, edge), { feed }), state));
         }
         return vertices;
     }
     // within a query getting the share vertex actually returns the one on the 'share' edge
-    async get(feed, id, version, viewDesc) {
-        feed = Buffer.isBuffer(feed) ? feed.toString('hex') : feed;
-        viewDesc = viewDesc || hyper_graphdb_1.GRAPH_VIEW;
-        const tr = await this.getTransaction(feed, version);
-        const vertex = await this.db.getInTransaction(id, this.codec, tr, feed);
-        const view = this.getView(viewDesc);
-        const next = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [])])).out('share').vertices();
+    async get(edge, state) {
+        const feed = edge.feed.toString('hex');
+        const tr = await this.getTransaction(feed);
+        const vertex = await this.db.getInTransaction(edge.ref, this.codec, tr, feed);
+        const view = this.getView(edge.view);
+        const next = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [], view)])).out('share').vertices();
         if (next.length === 0)
             throw new Error('vertex has no share edge, cannot use ShareView');
-        return next[0];
+        return this.toResult(next[0], edge, state);
     }
 }
 exports.ShareView = ShareView;

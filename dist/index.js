@@ -57,11 +57,12 @@ class CertaCryptGraph extends hyper_graphdb_1.HyperGraphDB {
         const edge = {
             label: 'share',
             ref: vertex.getId(),
+            view: opts === null || opts === void 0 ? void 0 : opts.view,
             version: vertex.getVersion(),
             feed: Buffer.from(vertex.getFeed(), 'hex'),
             metadata: {
                 key: this.getKey(vertex)
-            }
+            },
         };
         const shareVertex = this.create();
         shareVertex.setContent(share);
