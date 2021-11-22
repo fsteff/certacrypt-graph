@@ -57,9 +57,11 @@ export class ShareView extends View<GraphObject> {
         const vertex = await this.db.getInTransaction<GraphObject>(edge.ref, this.codec, tr, feed)
 
         const view = this.getView(edge.view) 
-        const next = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [], view)])).out('share').vertices()
+        const next = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [], view)])).out('share').states()
         if(next.length === 0) throw new Error('vertex has no share edge, cannot use ShareView')
-        return this.toResult(next[0], edge, state)
+        // duplicate state
+        const mergedState = next[0].mergeStates(next[0].value, state.path, state.rules, next[0].view)
+        return this.toResult(next[0].value, edge, mergedState)
     }
 
 }
