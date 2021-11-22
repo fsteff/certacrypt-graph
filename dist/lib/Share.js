@@ -36,33 +36,20 @@ class ShareView extends hyper_graphdb_1.View {
         super(...arguments);
         this.viewName = exports.SHARE_VIEW;
     }
-    async out(state, label) {
-        var _a;
-        const vertex = state.value;
-        if (!(vertex.getContent() instanceof ShareGraphObject)) {
-            throw new Error('Vertex is not a a physical one, cannot use it for a ShareView');
-        }
-        const edges = vertex.getEdges(label);
-        const vertices = [];
-        for (const edge of edges) {
-            const version = (_a = vertex.getContent()) === null || _a === void 0 ? void 0 : _a.version; // optional, might be undefined - TODO: test pinning
-            const feed = edge.feed || Buffer.from(vertex.getFeed());
-            vertices.push(this.get(Object.assign(Object.assign({}, edge), { feed }), state));
-        }
-        return vertices;
-    }
     // within a query getting the share vertex actually returns the one on the 'share' edge
     async get(edge, state) {
         const feed = edge.feed.toString('hex');
         const tr = await this.getTransaction(feed);
         const vertex = await this.db.getInTransaction(edge.ref, this.codec, tr, feed);
         const view = this.getView(edge.view);
-        const next = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [], view)])).out('share').states();
-        if (next.length === 0)
+        const nextStates = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [], view)])).out('share').states();
+        if (nextStates.length === 0)
             throw new Error('vertex has no share edge, cannot use ShareView');
         // duplicate state
-        const mergedState = next[0].mergeStates(next[0].value, state.path, state.rules, next[0].view);
-        return this.toResult(next[0].value, edge, mergedState);
+        return nextStates.map(next => {
+            const mergedState = next.mergeStates(next.value, state.path, state.rules, next.view);
+            return Promise.resolve(this.toResult(next.value, edge, mergedState));
+        });
     }
 }
 exports.ShareView = ShareView;
