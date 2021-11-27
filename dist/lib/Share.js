@@ -41,7 +41,7 @@ class ShareView extends hyper_graphdb_1.View {
         const feed = edge.feed.toString('hex');
         const tr = await this.getTransaction(feed);
         const vertex = await this.db.getInTransaction(edge.ref, this.codec, tr, feed);
-        const view = this.getView(edge.view);
+        const view = this.getView(hyper_graphdb_1.GRAPH_VIEW);
         const nextStates = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [], view)])).out('share').states();
         if (nextStates.length === 0)
             throw new Error('vertex has no share edge, cannot use ShareView');

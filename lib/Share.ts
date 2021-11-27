@@ -1,4 +1,4 @@
-import { Generator, GraphObject, View, Vertex, Edge  } from 'hyper-graphdb'
+import { Generator, GraphObject, View, Vertex, Edge, GRAPH_VIEW  } from 'hyper-graphdb'
 import { QueryState } from 'hyper-graphdb'
 import { QueryResult } from 'hyper-graphdb'
 
@@ -40,7 +40,7 @@ export class ShareView extends View<GraphObject> {
         const tr = await this.getTransaction(feed)
         const vertex = await this.db.getInTransaction<GraphObject>(edge.ref, this.codec, tr, feed)
 
-        const view = this.getView(edge.view) 
+        const view = this.getView(GRAPH_VIEW) 
         const nextStates = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [], view)])).out('share').states()
         if(nextStates.length === 0) throw new Error('vertex has no share edge, cannot use ShareView')
         // duplicate state
