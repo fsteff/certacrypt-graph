@@ -16,6 +16,8 @@ class ShareGraphObject extends hyper_graphdb_1.GraphObject {
                 this.info = json.info;
             if (json.owner)
                 this.owner = json.owner;
+            if (json.revoked)
+                this.revoked = !!json.revoked;
         }
     }
     serialize() {
@@ -26,6 +28,8 @@ class ShareGraphObject extends hyper_graphdb_1.GraphObject {
             json.info = this.info;
         if (this.owner)
             json.owner = this.owner;
+        if (this.revoked)
+            json.revoked = true;
         return Buffer.from(JSON.stringify(json));
     }
 }
@@ -38,9 +42,12 @@ class ShareView extends hyper_graphdb_1.View {
     }
     // within a query getting the share vertex actually returns the one on the 'share' edge
     async get(edge, state) {
+        var _a;
         const feed = edge.feed.toString('hex');
         const tr = await this.getTransaction(feed);
         const vertex = await this.db.getInTransaction(edge.ref, this.codec, tr, feed);
+        if ((_a = vertex.getContent()) === null || _a === void 0 ? void 0 : _a.revoked)
+            return Promise.reject(new Error('Share has been revoked'));
         const view = this.getView(hyper_graphdb_1.GRAPH_VIEW);
         const nextStates = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [], view)])).out('share').states();
         if (nextStates.length === 0)

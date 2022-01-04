@@ -9,22 +9,25 @@ export class ShareGraphObject extends GraphObject {
     public version?: number
     public info?: string
     public owner?: string
+    public revoked?: boolean
 
     constructor(serialized?: Uint8Array) {
         super()
         if(serialized) {
-            const json: {version?: number, info?: string, owner?: string} = JSON.parse(serialized.toString())
+            const json: {version?: number, info?: string, owner?: string, revoked?: boolean} = JSON.parse(serialized.toString())
             if(json.version) this.version = json.version
             if(json.info) this.info = json.info
             if(json.owner) this.owner = json.owner
+            if(json.revoked) this.revoked = !!json.revoked
         }
     }
 
     public serialize() {
-        let json: {version?: number, info?: string, owner?: string} = {}
+        let json: {version?: number, info?: string, owner?: string, revoked?: boolean} = {}
         if(this.version) json.version = this.version
         if(this.info) json.info = this.info
         if(this.owner) json.owner = this.owner
+        if(this.revoked) json.revoked = true
         return Buffer.from(JSON.stringify(json))
     }
 }
@@ -39,6 +42,8 @@ export class ShareView extends View<GraphObject> {
 
         const tr = await this.getTransaction(feed)
         const vertex = await this.db.getInTransaction<GraphObject>(edge.ref, this.codec, tr, feed)
+
+        if((<Vertex<ShareGraphObject>>vertex).getContent()?.revoked) return Promise.reject(new Error('Share has been revoked'))
 
         const view = this.getView(GRAPH_VIEW) 
         const nextStates = await view.query(Generator.from([new QueryState<GraphObject>(vertex, [], [], view)])).out('share').states()
