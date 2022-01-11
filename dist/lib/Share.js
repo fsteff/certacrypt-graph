@@ -44,8 +44,7 @@ class ShareView extends hyper_graphdb_1.View {
     async get(edge, state) {
         var _a;
         const feed = edge.feed.toString('hex');
-        const tr = await this.getTransaction(feed);
-        const vertex = await this.db.getInTransaction(edge.ref, this.codec, tr, feed);
+        const vertex = await this.getVertex(edge, state);
         if ((_a = vertex.getContent()) === null || _a === void 0 ? void 0 : _a.revoked)
             return Promise.reject(new Error('Share has been revoked'));
         const view = this.getView(hyper_graphdb_1.GRAPH_VIEW);

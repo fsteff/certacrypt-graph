@@ -40,9 +40,7 @@ export class ShareView extends View<GraphObject> {
     public async get(edge: Edge & {feed: Buffer}, state: QueryState<GraphObject>): Promise<QueryResult<GraphObject>> {
         const feed = edge.feed.toString('hex')
 
-        const tr = await this.getTransaction(feed)
-        const vertex = await this.db.getInTransaction<GraphObject>(edge.ref, this.codec, tr, feed)
-
+        const vertex = await this.getVertex(edge, state)
         if((<Vertex<ShareGraphObject>>vertex).getContent()?.revoked) return Promise.reject(new Error('Share has been revoked'))
 
         const view = this.getView(GRAPH_VIEW) 
