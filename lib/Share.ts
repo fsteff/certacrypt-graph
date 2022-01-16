@@ -48,7 +48,7 @@ export class ShareView extends View<GraphObject> {
         if(nextStates.length === 0) throw new Error('vertex has no share edge, cannot use ShareView')
         // duplicate state
         return nextStates.map(next => {
-            const mergedState = next.mergeStates(next.value, state.path, state.rules, next.view)
+            const mergedState = next.mergeStates(next.value, state.path, next.rules, next.view)
             return Promise.resolve(this.toResult(next.value, edge, mergedState))
         })
     }
