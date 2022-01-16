@@ -1,7 +1,4 @@
-import { Generator, GraphObject, View, Vertex, Edge, GRAPH_VIEW  } from 'hyper-graphdb'
-import { QueryState } from 'hyper-graphdb'
-import { QueryResult } from 'hyper-graphdb'
-
+import { Generator, GraphObject, View, Vertex, Edge, GRAPH_VIEW, QueryResult, QueryState  } from '@certacrypt/hyper-graphdb'
 export const SHARE_GRAPHOBJECT = 'Share'
 
 export class ShareGraphObject extends GraphObject {

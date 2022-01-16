@@ -1,4 +1,4 @@
-import { Errors as HyperGraphErrors } from 'hyper-graphdb'
+import { Errors as HyperGraphErrors } from '@certacrypt/hyper-graphdb'
 import { Errors as HyperObjectsErrors } from 'hyperobjects'
 
 export class NoAccessError extends Error {

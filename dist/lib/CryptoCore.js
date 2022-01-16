@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CryptoCore = void 0;
-const hyper_graphdb_1 = require("hyper-graphdb");
-const certacrypt_crypto_1 = require("certacrypt-crypto");
+const hyper_graphdb_1 = require("@certacrypt/hyper-graphdb");
+const certacrypt_crypto_1 = require("@certacrypt/certacrypt-crypto");
 const hyperobjects_1 = require("hyperobjects");
 const Errors_1 = require("./Errors");
 const buffer_crc32_1 = __importDefault(require("buffer-crc32"));

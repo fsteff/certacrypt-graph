@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ShareView = exports.SHARE_VIEW = exports.ShareGraphObject = exports.SHARE_GRAPHOBJECT = void 0;
-const hyper_graphdb_1 = require("hyper-graphdb");
-const hyper_graphdb_2 = require("hyper-graphdb");
+const hyper_graphdb_1 = require("@certacrypt/hyper-graphdb");
 exports.SHARE_GRAPHOBJECT = 'Share';
 class ShareGraphObject extends hyper_graphdb_1.GraphObject {
     constructor(serialized) {
@@ -48,7 +47,7 @@ class ShareView extends hyper_graphdb_1.View {
         if ((_a = vertex.getContent()) === null || _a === void 0 ? void 0 : _a.revoked)
             return Promise.reject(new Error('Share has been revoked'));
         const view = this.getView(hyper_graphdb_1.GRAPH_VIEW);
-        const nextStates = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_2.QueryState(vertex, [], [], view)])).out('share').states();
+        const nextStates = await view.query(hyper_graphdb_1.Generator.from([new hyper_graphdb_1.QueryState(vertex, [], [], view)])).out('share').states();
         if (nextStates.length === 0)
             throw new Error('vertex has no share edge, cannot use ShareView');
         // duplicate state

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NoAccessError = void 0;
-const hyper_graphdb_1 = require("hyper-graphdb");
+const hyper_graphdb_1 = require("@certacrypt/hyper-graphdb");
 const hyperobjects_1 = require("hyperobjects");
 class NoAccessError extends Error {
     constructor(objectId, err) {

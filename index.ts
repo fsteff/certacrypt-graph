@@ -1,5 +1,5 @@
-import { GraphObject, HyperGraphDB, Vertex, Corestore, Errors as HyperGraphErrors } from 'hyper-graphdb'
-import { ICrypto, Cipher } from 'certacrypt-crypto'
+import { GraphObject, HyperGraphDB, Vertex, Corestore } from '@certacrypt/hyper-graphdb'
+import { ICrypto, Cipher } from '@certacrypt/certacrypt-crypto'
 import { CryptoCore } from './lib/CryptoCore'
 import { NoAccessError } from './lib/Errors'
 import { ShareGraphObject, ShareView, SHARE_VIEW, SHARE_GRAPHOBJECT } from './lib/Share'
